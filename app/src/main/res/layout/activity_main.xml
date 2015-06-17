@@ -1,0 +1,85 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    android:layout_height="match_parent" tools:context=".MainActivity"
+    android:orientation="vertical"
+    android:background="@color/clouds">
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/main_toolbar"
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:minHeight="?attr/actionBarSize"
+        android:background="?attr/colorPrimary" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginLeft="30dp"
+        android:layout_marginRight="30dp"
+        android:layout_marginTop="30dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="?attr/android:textAppearanceLarge"
+            android:text="@string/my_nanodegree_apps"
+            android:gravity="center_horizontal"
+            android:textColor="@color/red_700"/>
+
+        <Button
+            android:id="@+id/spotify_btn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/spotify_streamer_app"
+            android:background="@drawable/button_background_one"
+            android:layout_marginTop="20dp"/>
+
+        <Button
+            android:id="@+id/scores_btn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/scores_app"
+            android:background="@drawable/button_background_one"
+            android:layout_marginTop="20dp"
+            android:onClick="displayToast"/>
+
+        <Button
+            android:id="@+id/library_btn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/library_app"
+            android:background="@drawable/button_background_one"
+            android:layout_marginTop="20dp"
+            android:onClick="displayToast"/>
+
+        <Button
+            android:id="@+id/build_it_btn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/build_it_bigger_app"
+            android:background="@drawable/button_background_one"
+            android:layout_marginTop="20dp"
+            android:onClick="displayToast"/>
+
+        <Button
+            android:id="@+id/xyz_btn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/xyz_reader_app"
+            android:background="@drawable/button_background_one"
+            android:layout_marginTop="20dp"
+            android:onClick="displayToast"/>
+
+        <Button
+            android:id="@+id/capstone_btn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/capstone_my_own_app"
+            android:background="@drawable/button_background_two"
+            android:layout_marginTop="20dp"
+            android:onClick="displayToast"/>
+
+    </LinearLayout>
+
+</LinearLayout>

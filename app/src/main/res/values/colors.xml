@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <color name="amber_500">#FFC107</color>
+    <color name="amber_700">#FFA000</color>
+    <color name="amber_900">#FF6F00</color>
+    
+    <color name="yellow_A200">#FFFF00</color>
+
+    <color name="red_500">#F44336</color>
+    <color name="red_700">#D32F2F</color>
+
+    <color name="clouds">#ecf0f1</color>
+
+</resources>

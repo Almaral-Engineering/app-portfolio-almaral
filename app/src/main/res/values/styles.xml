@@ -1,0 +1,23 @@
+<resources>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+
+        <item name="colorPrimary">@color/amber_700</item>
+        <item name="colorPrimaryDark">@color/amber_900</item>
+
+        <item name="colorAccent">@android:color/holo_red_dark</item>
+
+        <item name="android:textColorPrimary">@android:color/white</item>
+
+    </style>
+
+    <style name="DarkTheme" parent="Theme.AppCompat.NoActionBar">
+
+        <item name="colorPrimary">@color/amber_700</item>
+        <item name="colorPrimaryDark">@color/amber_900</item>
+        <item name="colorAccent">@android:color/holo_red_dark</item>
+
+    </style>
+
+</resources>

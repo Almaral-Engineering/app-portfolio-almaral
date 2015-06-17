@@ -1,0 +1,36 @@
+<resources>
+    <string name="app_name">My App Portfolio</string>
+
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    
+    <!--////////////////////////////// MainActivity ///////////////////////////////////////////-->
+
+    <string name="my_nanodegree_apps">My Nanodegree Apps!</string>
+    <string name="button_will_launch_app">This button will launch my&#160;</string>
+
+    <!-- App Names -->
+    <string name="spotify_streamer_app">Spotify Streamer App</string>
+    <string name="scores_app">Scores App</string>
+    <string name="library_app">Library App</string>
+    <string name="build_it_bigger_app">Build it bigger App</string>
+    <string name="xyz_reader_app">XYZ Reader App</string>
+    <string name="capstone_my_own_app">Capstone: My Own App</string>
+    <string name="title_activity_spotify_main">SpotifyMainActivity</string>
+
+    <!--/////////////////////////// SpotifyMainActivity //////////////////////////////////////-->
+    <string name="spotify_streamer">Spotify Streamer</string>
+    <string name="search_hint">Artist Name</string>
+    <string name="top_tracks">Top 10 Tracks</string>
+
+    <!--/////////////////////////// SpotifyMainFragment //////////////////////////////////////-->
+    <string name="must_insert_artirs_message">You must insert an artist name</string>
+    <string name="no_artists_found">No artists found with this name</string>
+    <string name="search">Search</string>
+    <string name="title_activity_spotify_activity_top_tracks">SpotifyActivityTopTracks</string>
+
+<!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="title_activity_spotify_play">SpotifyPlayActivity</string>
+    
+</resources>
