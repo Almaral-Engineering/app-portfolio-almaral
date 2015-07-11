@@ -12,10 +12,13 @@
         android:background="?attr/colorPrimary"
         android:theme="@style/DarkTheme"/>
 
-    <FrameLayout
-        android:id="@+id/container"
-        android:layout_below="@id/spotify_toolbar"
+    <fragment
+        android:id="@+id/spotify_main_fragment"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="match_parent"
+        android:layout_below="@id/spotify_toolbar"
+        android:name="com.almareng.appportfolio.SpotifyMainFragment"
+        tools:context = "com.almareng.appportfolio.SpotifyMainFragment"
+        tools:layout = "@android:layout/list_content"/>
 
 </RelativeLayout>

@@ -10,10 +10,11 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.almareng.appportfolio.Objects.MusicItem;
-import com.almareng.appportfolio.Objects.MusicItems;
 import com.almareng.appportfolio.Objects.TrackItem;
 import com.almareng.appportfolio.R;
 import com.squareup.picasso.Picasso;
+
+import java.util.ArrayList;
 
 /**
  * Created by Almaral17@gmail.com on 6/15/2015.
@@ -21,9 +22,9 @@ import com.squareup.picasso.Picasso;
 public class MusicAdapter extends BaseAdapter{
 
     private Context mContext;
-    private MusicItems musicItems;
+    private ArrayList<MusicItem> musicItems;
 
-    public MusicAdapter(Context context, MusicItems musicItems){
+    public MusicAdapter(Context context, ArrayList<MusicItem> musicItems){
 
         mContext = context;
         this.musicItems = musicItems;

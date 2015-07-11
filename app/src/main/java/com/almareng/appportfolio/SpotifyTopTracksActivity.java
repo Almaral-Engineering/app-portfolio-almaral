@@ -7,6 +7,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
+import com.almareng.appportfolio.Objects.MusicItem;
+
 
 public class SpotifyTopTracksActivity extends AppCompatActivity {
 
@@ -30,9 +32,27 @@ public class SpotifyTopTracksActivity extends AppCompatActivity {
             }
         });
 
-        if(savedInstanceState == null) {
+        Bundle extras = getIntent().getExtras();
+
+        MusicItem chosenArtist = extras.getParcelable(SpotifyMainActivity.CHOSEN_ARTIST);
+
+        Bundle arguments = new Bundle();
+
+        if(chosenArtist != null) {
+
+            arguments.putParcelable(SpotifyMainActivity.CHOSEN_ARTIST, chosenArtist);
+
+            topTracksToolbar.setTitle(chosenArtist.getName());
+
+        }
+
+        SpotifyTopTracksFragment spotifyTopTracksFragment = new SpotifyTopTracksFragment();
+
+        spotifyTopTracksFragment.setArguments(arguments);
+
+        if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.top_tracks_container, new SpotifyTopTracksFragment())
+                    .add(R.id.top_tracks_container, spotifyTopTracksFragment)
                     .commit();
         }
 

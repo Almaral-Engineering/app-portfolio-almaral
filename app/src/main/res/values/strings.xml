@@ -29,8 +29,14 @@
     <string name="search">Search</string>
     <string name="title_activity_spotify_activity_top_tracks">SpotifyActivityTopTracks</string>
 
+
+    <!--/////////////////////////// SpotifyPlayActivity //////////////////////////////////////-->
+    <string name="title_activity_spotify_play">SpotifyPlayActivity</string>
+    <string name="zero_time">0:00</string>
+    <string name="final_time">0:30</string>
+    <string name="IO_exception_media_stream">url invalid or empty</string>
+
 <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string name="title_activity_spotify_play">SpotifyPlayActivity</string>
     
 </resources>

@@ -1,6 +1,5 @@
 package com.almareng.appportfolio;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -11,10 +10,10 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.almareng.appportfolio.Objects.MusicItem;
-import com.almareng.appportfolio.Objects.MusicItems;
 import com.almareng.appportfolio.adapters.MusicAdapter;
 
 import java.util.ArrayList;
@@ -40,10 +39,12 @@ public class SpotifyMainFragment extends Fragment {
 
     private EditText searchEdt;
 
-    private MusicItems mMusicItems = new MusicItems();
+    private ArrayList<MusicItem> mMusicItems = new ArrayList<>();
 
     private ListView artistList;
     private MusicAdapter mMusicAdapter;
+
+    private ProgressBar mLoadingWheel;
 
     public SpotifyMainFragment() {
     }
@@ -63,6 +64,8 @@ public class SpotifyMainFragment extends Fragment {
 
         searchEdt = (EditText) rootView.findViewById(R.id.search_edt);
         artistList = (ListView) rootView.findViewById(R.id.artist_list);
+
+        mLoadingWheel = (ProgressBar) rootView.findViewById(R.id.loading_wheel);
 
         mMusicAdapter = new MusicAdapter(getActivity(), mMusicItems);
 
@@ -114,13 +117,10 @@ public class SpotifyMainFragment extends Fragment {
         artistList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
                 MusicItem chosenArtist = (MusicItem) mMusicAdapter.getItem(position);
 
-                Intent intent = new Intent(getActivity(), SpotifyTopTracksActivity.class);
-
-                intent.putExtra(SpotifyMainActivity.ARTIST_ID, chosenArtist.getId());
-
-                startActivity(intent);
+                ((MainFragmentCallback)getActivity()).onItemSelected(chosenArtist);
 
             }
         });
@@ -129,7 +129,13 @@ public class SpotifyMainFragment extends Fragment {
 
     }
 
+    public interface MainFragmentCallback {
+        void onItemSelected(MusicItem chosenArtist);
+    }
+
     public void searchArtist(String artist){
+
+        mLoadingWheel.setVisibility(View.VISIBLE);
 
         mSpotify.searchArtists(artist, new Callback<ArtistsPager>() {
             @Override
@@ -141,6 +147,7 @@ public class SpotifyMainFragment extends Fragment {
 
                     getActivity().runOnUiThread(new Runnable() {
                         public void run() {
+                            mLoadingWheel.setVisibility(View.GONE);
                             Toast.makeText(getActivity(), getString(R.string.no_artists_found), Toast.LENGTH_SHORT).show();
                         }
                     });
@@ -171,6 +178,7 @@ public class SpotifyMainFragment extends Fragment {
 
                     getActivity().runOnUiThread(new Runnable() {
                         public void run() {
+                            mLoadingWheel.setVisibility(View.GONE);
                             mMusicAdapter.notifyDataSetChanged();
                         }
                     });
@@ -181,6 +189,12 @@ public class SpotifyMainFragment extends Fragment {
 
             @Override
             public void failure(RetrofitError error) {
+
+                getActivity().runOnUiThread(new Runnable() {
+                    public void run() {
+                        mLoadingWheel.setVisibility(View.GONE);
+                    }
+                });
                 Log.d("Album failed", error.toString());
             }
         });

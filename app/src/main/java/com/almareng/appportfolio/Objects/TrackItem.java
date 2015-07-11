@@ -10,20 +10,24 @@ public class TrackItem extends MusicItem implements Parcelable {
 
     private String id;
     private String name;
+    private long duration;
     private String smallImageUrl;
     private String albumName;
     private String bigImageUrl;
     private String previewUrl;
 
-    public TrackItem(String id, String name, String smallImageUrl, String bigImageUrl, String albumName, String previewUrl) {
+    public TrackItem(String id, String name, long duration, String smallImageUrl, String bigImageUrl, String albumName, String previewUrl) {
         super(id, name, smallImageUrl);
         this.id = id;
         this.smallImageUrl = smallImageUrl;
         this.name = name;
+        this.duration = duration;
         this.albumName = albumName;
         this.bigImageUrl = bigImageUrl;
         this.previewUrl = previewUrl;
     }
+
+    public long getDuration(){return duration; }
 
     public String getAlbumName() {
         return albumName;
@@ -59,6 +63,7 @@ public class TrackItem extends MusicItem implements Parcelable {
         albumName = in.readString();
         bigImageUrl = in.readString();
         previewUrl = in.readString();
+        duration = in.readLong();
     }
 
     @Override
@@ -74,6 +79,7 @@ public class TrackItem extends MusicItem implements Parcelable {
         dest.writeString(albumName);
         dest.writeString(bigImageUrl);
         dest.writeString(previewUrl);
+        dest.writeLong(duration);
     }
 
     @SuppressWarnings("unused")
