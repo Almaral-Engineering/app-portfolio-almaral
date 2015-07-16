@@ -9,7 +9,12 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.support.v4.app.DialogFragment;
+import android.support.v4.view.MenuItemCompat;
+import android.support.v7.widget.ShareActionProvider;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
@@ -62,9 +67,14 @@ public class SpotifyPlayFragment extends DialogFragment implements View.OnClickL
     private TextView mAlbumTxt;
     private ImageView mAlbumImage;
 
+    private ShareActionProvider mShareActionProvider;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        setHasOptionsMenu(true);
+
         mWasPaused = false;
 
         mPlaying = getArguments().getBoolean(SpotifyMainActivity.NOW_PLAYING_STATUS);
@@ -384,6 +394,12 @@ public class SpotifyPlayFragment extends DialogFragment implements View.OnClickL
                 mPlaying = true;
             }
 
+            if(mShareActionProvider != null){
+
+                mShareActionProvider.setShareIntent(createShareTrackIntent());
+
+            }
+
             animateSeekBar();
 
         }
@@ -393,5 +409,33 @@ public class SpotifyPlayFragment extends DialogFragment implements View.OnClickL
             mBound = false;
         }
     };
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+
+        inflater.inflate(R.menu.menu_spotify_play, menu);
+
+        MenuItem menuItem = menu.findItem(R.id.action_share);
+
+        mShareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(menuItem);
+
+        if(mTrackItem != null){
+
+            mShareActionProvider.setShareIntent(createShareTrackIntent());
+
+        }
+    }
+
+    private Intent createShareTrackIntent(){
+
+        Intent shareIntent = new Intent(Intent.ACTION_SEND);
+        shareIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
+        shareIntent.setType("text/plain");
+        shareIntent.putExtra(Intent.EXTRA_TEXT, String.format(getString(R.string.spotify_share_string),mTrackItem.getName(),mArtistName,mTrackItem.getPreviewUrl()));
+
+        return shareIntent;
+
+    }
 
 }

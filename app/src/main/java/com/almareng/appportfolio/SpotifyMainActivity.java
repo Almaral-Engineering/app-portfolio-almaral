@@ -118,9 +118,9 @@ public class SpotifyMainActivity extends AppCompatActivity implements SpotifyMai
             } else {
                 menu.findItem(R.id.action_now_playing).setVisible(false);
             }
-
         }
         return super.onPrepareOptionsMenu(menu);
+
     }
 
     @Override

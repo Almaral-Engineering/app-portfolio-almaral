@@ -29,6 +29,7 @@
     <string name="no_artists_found">No artists found with this name</string>
     <string name="search">Search</string>
     <string name="title_activity_spotify_activity_top_tracks">SpotifyActivityTopTracks</string>
+    <string name="spotify_share_string">Hey, I am listening the song \"%1$s\" from %2$s, do you want to listen it? This is the link:\n%3$s</string>
 
     <!--/////////////////////////// SpotifyPlayActivity //////////////////////////////////////-->
     <string name="title_activity_spotify_play">SpotifyPlayActivity</string>
@@ -36,7 +37,8 @@
     <string name="final_time">0:30</string>
     <string name="IO_exception_media_stream">url invalid or empty</string>
 
-<!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
-    
+    <!--/////////////////////////// Spotify Menu Options //////////////////////////////////////-->
+    <string name="action_now_playing">Now Playing</string>
+    <string name="action_share">Share</string>
+
 </resources>
