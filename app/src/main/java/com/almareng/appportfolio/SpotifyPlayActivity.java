@@ -12,6 +12,8 @@ import java.util.ArrayList;
 
 public class SpotifyPlayActivity extends AppCompatActivity{
 
+    public final static String SONG_PREF = "song_preferences";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -46,6 +48,7 @@ public class SpotifyPlayActivity extends AppCompatActivity{
                 Bundle bundle = new Bundle();
                 bundle.putParcelableArrayList(SpotifyMainActivity.TRACKS, musicItems);
                 bundle.putString(SpotifyMainActivity.ARTIST_NAME, artistName);
+                bundle.putBoolean(SpotifyMainActivity.NOW_PLAYING_STATUS, extras.getBoolean(SpotifyMainActivity.NOW_PLAYING_STATUS));
                 bundle.putInt(SpotifyMainActivity.TRACK_POSITION, extras.getInt(SpotifyMainActivity.TRACK_POSITION));
                 playFragment.setArguments(bundle);
 

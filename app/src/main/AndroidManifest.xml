@@ -39,6 +39,9 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.almareng.appportfolio.SpotifyTopTracksActivity" />
         </activity>
+
+        <service android:name=".services.SpotifyPlayService"
+            android:exported="false"/>
     </application>
 
 </manifest>

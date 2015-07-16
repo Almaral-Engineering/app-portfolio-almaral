@@ -105,6 +105,15 @@ public class SpotifyTopTracksFragment extends Fragment {
 
                     intent.putExtra(SpotifyMainActivity.ARTIST_NAME, mArtistName);
 
+                    TrackItem trackItem = (TrackItem) mMusicItems.get(position);
+
+                    if(trackItem.getId().equals(((SpotifyTopTracksActivity)getActivity()).getCurrentTrackId())){
+                        intent.putExtra(SpotifyMainActivity.NOW_PLAYING_STATUS, true);
+                    }
+                    else{
+                        intent.putExtra(SpotifyMainActivity.NOW_PLAYING_STATUS, false);
+                    }
+
                     startActivity(intent);
                 }
 

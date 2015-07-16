@@ -1,11 +1,14 @@
 package com.almareng.appportfolio;
 
-import android.support.v4.app.DialogFragment;
-import android.media.AudioManager;
-import android.media.MediaPlayer;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.Log;
+import android.os.IBinder;
+import android.support.v4.app.DialogFragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,26 +17,29 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.almareng.appportfolio.Objects.MusicItem;
 import com.almareng.appportfolio.Objects.TrackItem;
+import com.almareng.appportfolio.services.SpotifyPlayService;
 import com.squareup.picasso.Picasso;
 
-import java.io.IOException;
 import java.util.ArrayList;
 
 public class SpotifyPlayFragment extends DialogFragment implements View.OnClickListener{
 
+    private SpotifyPlayService mSpotifyPlayService;
+    private boolean mBound = false;
+
     private final String LOG_TAG = SpotifyPlayActivity.class.getSimpleName();
     private final String PLAYING_FLAG = "playing_flag";
-    private final String PLAYER_POSITION = "playing_position";
     private final String CURRENT_TRACK_POSITION = "current_track_position";
 
-    private String mPreviewUrl;
+    private Handler mHandler;
+    private Runnable mRunnable;
 
-    private MediaPlayer mMediaPlayer;
-
-    private boolean mPlaying = false;
+    private boolean mPlaying;
+    private boolean mWasPaused;
 
     private ImageButton mPlayButton;
     private ImageButton mNextButton;
@@ -57,12 +63,20 @@ public class SpotifyPlayFragment extends DialogFragment implements View.OnClickL
     private ImageView mAlbumImage;
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        mWasPaused = false;
+
+        mPlaying = getArguments().getBoolean(SpotifyMainActivity.NOW_PLAYING_STATUS);
 
         mMusicItems = getArguments().getParcelableArrayList(SpotifyMainActivity.TRACKS);
-
         mArtistName = getArguments().getString(SpotifyMainActivity.ARTIST_NAME);
+
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
 
         View rootView = inflater.inflate(R.layout.fragment_spotify_play, container, false);
 
@@ -107,29 +121,32 @@ public class SpotifyPlayFragment extends DialogFragment implements View.OnClickL
                 int progress = seekBar.getProgress();
 
                 mPlayerCurrentPosition = progress * 1000;
-                if(mMediaPlayer != null){
-                    mMediaPlayer.seekTo(mPlayerCurrentPosition);
-                }
 
-                if((mPlayerCurrentPosition/1000) < 10)
-                    mTrackProgress.setText("0:0" + mPlayerCurrentPosition/1000);
-                else
-                    mTrackProgress.setText("0:" + mPlayerCurrentPosition/1000);
+                if(mSpotifyPlayService.playerIsPlaying()) {
+                    mSpotifyPlayService.seekTo(mPlayerCurrentPosition);
+
+                    if ((mPlayerCurrentPosition / 1000) < 10)
+                        mTrackProgress.setText("0:0" + mPlayerCurrentPosition / 1000);
+                    else
+                        mTrackProgress.setText("0:" + mPlayerCurrentPosition / 1000);
+
+                } else{
+
+                    mPlayBar.setProgress(0);
+                    Toast.makeText(getActivity(), "Wait fot the song to start", Toast.LENGTH_SHORT).show();
+
+                }
 
             }
         });
+
+        mPlayBar.setProgress(0);
 
         if(savedInstanceState != null){
 
             mTrackPosition = savedInstanceState.getInt(CURRENT_TRACK_POSITION);
 
             mPlaying = savedInstanceState.getBoolean(PLAYING_FLAG);
-            mPlayerCurrentPosition = savedInstanceState.getInt(PLAYER_POSITION);
-
-            if((mPlayerCurrentPosition/1000) < 10)
-                mTrackProgress.setText("0:0" + mPlayerCurrentPosition/1000);
-            else
-                mTrackProgress.setText("0:" + mPlayerCurrentPosition/1000);
 
         } else{
 
@@ -144,10 +161,6 @@ public class SpotifyPlayFragment extends DialogFragment implements View.OnClickL
         if(mPlaying){
 
             mPlayButton.setImageResource(android.R.drawable.ic_media_pause);
-            if(mMediaPlayer == null)
-                playPreview();
-            else
-                mMediaPlayer.start();
 
         }
 
@@ -160,19 +173,27 @@ public class SpotifyPlayFragment extends DialogFragment implements View.OnClickL
 
         if (mTrackItem != null) {
 
-            mPreviewUrl = mTrackItem.getPreviewUrl();
-
             if(mArtistName == null) {
                 mArtistName = getArguments().getString(SpotifyMainActivity.ARTIST_NAME);
             }
-            else {
-                mArtistTxt.setText(mArtistName);
-            }
+
+            mArtistTxt.setText(mArtistName);
+
             mTrackTxt.setText(mTrackItem.getName());
             mAlbumTxt.setText(mTrackItem.getAlbumName());
             Picasso.with(getActivity()).load(mTrackItem.getBigImageUrl()).placeholder(R.mipmap.ic_launcher).into(mAlbumImage);
 
             mPlayBar.setMax(30);
+
+            SharedPreferences playingNowPref = getActivity().getApplicationContext().getSharedPreferences(SpotifyMainActivity.NOW_PLAYING_PREFS, 0);
+
+            SharedPreferences.Editor editor = playingNowPref.edit();
+
+            editor.putString(SpotifyMainActivity.NOW_PLAYING_ARTIST_NAME, mArtistName);
+            editor.putInt(SpotifyMainActivity.NOW_PLAYING_TRACK_POSITION, mTrackPosition);
+            editor.putString(SpotifyMainActivity.NOW_PLAYING_TRACK_ID, trackItem.getId());
+            editor.apply();
+
         }
     }
 
@@ -186,13 +207,12 @@ public class SpotifyPlayFragment extends DialogFragment implements View.OnClickL
             case R.id.button_play:
                 if (mPlaying) {
 
-                    if(mMediaPlayer.isPlaying()) {
+                    if(mBound && mSpotifyPlayService.playerIsPlaying()) {
                         mPlayButton.setImageResource(android.R.drawable.ic_media_play);
                         mPlaying = false;
+                        mWasPaused = true;
 
-                        if(mMediaPlayer != null) {
-                            mMediaPlayer.pause();
-                        }
+                        mSpotifyPlayService.pauseTrack();
                     }
 
                 } else {
@@ -200,29 +220,36 @@ public class SpotifyPlayFragment extends DialogFragment implements View.OnClickL
                     mPlayButton.setImageResource(android.R.drawable.ic_media_pause);
                     mPlaying = true;
 
-                    if (mMediaPlayer == null)
-                        playPreview();
-                    else
-                        mMediaPlayer.start();
+                    if(mWasPaused){
+                        mSpotifyPlayService.resumeTrack();
+                        mWasPaused = false;
+                    } else {
+                        mSpotifyPlayService.setTrack(mTrackPosition);
+                        mSpotifyPlayService.playTrack();
+                    }
 
                 }
                 break;
 
             case R.id.button_next:
-                if (mMusicItems.size() > (mTrackPosition + 1))
+                if (mMusicItems.size() > (mTrackPosition + 1)) {
                     ++mTrackPosition;
-                else
+                }
+                else {
                     mTrackPosition = 0;
+                }
 
                 setTrackToPlay();
 
                 break;
 
             case R.id.button_previous:
-                if (mTrackPosition > 0 )
+                if (mTrackPosition > 0 ) {
                     --mTrackPosition;
-                else
+                }
+                else {
                     mTrackPosition = mMusicItems.size() - 1;
+                }
 
                 setTrackToPlay();
 
@@ -231,108 +258,91 @@ public class SpotifyPlayFragment extends DialogFragment implements View.OnClickL
 
     }
 
-    public void setTrackToPlay(){
+    public void setTrackToPlay() {
+
+        mPlaying = true;
+        mWasPaused = false;
+
+        mSpotifyPlayService.setTrack(mTrackPosition);
+
+        mSpotifyPlayService.playTrack();
+        mPlayButton.setImageResource(android.R.drawable.ic_media_pause);
 
         mTrackItem = (TrackItem) mMusicItems.get(mTrackPosition);
 
         setViews(mTrackItem);
 
-        mPlayerCurrentPosition = 0;
-        mTrackProgress.setText(getString(R.string.zero_time));
-        mPlayBar.setProgress(0);
+    }
 
-        stopMediaPlayer();
+    @Override
+    public void onStart() {
+        super.onStart();
 
-        mPlayerCurrentPosition = 0;
-
-        if(mPlaying) {
-            playPreview();
-        }
+        Intent intent = new Intent(getActivity(), SpotifyPlayService.class);
+        getActivity().getApplicationContext().bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+        getActivity().startService(intent);
 
     }
 
-    public void playPreview(){
+    @Override
+    public void onStop() {
+        super.onStop();
 
-        try{
-            mLoadingWheel.setVisibility(View.VISIBLE);
-            String url = mPreviewUrl;
-            mMediaPlayer = new MediaPlayer();
-            mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-            mMediaPlayer.setDataSource(url);
-            mMediaPlayer.prepareAsync();
-            mMediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-                @Override
-                public void onPrepared(MediaPlayer mp) {
-                    int trackDuration = mMediaPlayer.getDuration();
-                    mPlayBar.setMax(trackDuration/1000);
-                    mTrackDuration.setText("0:" + trackDuration/1000);
-                    mMediaPlayer.seekTo(mPlayerCurrentPosition);
-                    mMediaPlayer.start();
-                    mLoadingWheel.setVisibility(View.GONE);
-                    animateSeekBar();
-                }
-            });
-            mMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                @Override
-                public void onCompletion(MediaPlayer mp) {
-                    if(mLoadingWheel.getVisibility() == View.GONE) {
-                        mPlayButton.setImageResource(android.R.drawable.ic_media_play);
-                        mPlaying = false;
-                        mPlayerCurrentPosition = 0;
-                        mTrackProgress.setText(getString(R.string.zero_time));
-                        mPlayBar.setProgress(0);
-                        mMediaPlayer.seekTo(0);
-                    }
-                }
-            });
+        if(mHandler != null) {
+            mHandler.removeCallbacks(mRunnable);
+        }
 
-        } catch (IllegalArgumentException | IOException e){
+        if(mBound){
 
-            mLoadingWheel.setVisibility(View.GONE);
-            Log.e(LOG_TAG, getString(R.string.IO_exception_media_stream));
+            getActivity().getApplicationContext().unbindService(mConnection);
+            mBound = false;
 
         }
 
+        mPlaying = true;
+
     }
 
-    private Handler mHandler;
+    private int timerCount = 0;
 
     public void animateSeekBar(){
 
         mHandler = new Handler();
 
-        final Runnable runnable = new Runnable() {
+        mRunnable = new Runnable() {
             public void run() {
-                if (mMediaPlayer != null) {
-                    mPlayerCurrentPosition = mMediaPlayer.getCurrentPosition();
-                    int currentPositionInSecs = mPlayerCurrentPosition / 1000;
-                    mPlayBar.setProgress(currentPositionInSecs);
+
+                mPlayerCurrentPosition = mSpotifyPlayService.getPlayerPosition();
+                int currentPositionInSecs = mPlayerCurrentPosition / 1000;
+                mPlayBar.setProgress(currentPositionInSecs);
+
+                if(mTrackPosition != mSpotifyPlayService.getTrackPosition()) {
+                    if (mMusicItems.size() > (mTrackPosition + 1)) {
+                        ++mTrackPosition;
+                    }
+                    else {
+                        mTrackPosition = 0;
+                    }
+                    setTrackToPlay();
+                }
+
+                ++timerCount;
+                if(timerCount == 5) {
                     if (currentPositionInSecs < 10)
                         mTrackProgress.setText("0:0" + currentPositionInSecs);
                     else
                         mTrackProgress.setText("0:" + currentPositionInSecs);
 
-                    mHandler.postDelayed(this, 1000);
+                    timerCount = 0;
                 }
+
+                mHandler.postDelayed(this, 200);
+
             }
         };
 
-        mHandler.postDelayed(runnable, 1000);
+        mHandler.postDelayed(mRunnable, 200);
 
-    }
-
-    @Override
-    public void onDestroy() {
-        stopMediaPlayer();
-        super.onDestroy();
-    }
-
-    public void stopMediaPlayer(){
-        if(mMediaPlayer != null) {
-            mMediaPlayer.stop();
-            mMediaPlayer.release();
-            mMediaPlayer = null;
-        }
     }
 
     @Override
@@ -341,13 +351,47 @@ public class SpotifyPlayFragment extends DialogFragment implements View.OnClickL
         outState.putBoolean(PLAYING_FLAG, mPlaying);
         outState.putInt(CURRENT_TRACK_POSITION, mTrackPosition);
 
-        if(mMediaPlayer != null) {
-            outState.putInt(PLAYER_POSITION, mMediaPlayer.getCurrentPosition());
-        } else{
-            outState.putInt(PLAYER_POSITION, 0);
-        }
-
         super.onSaveInstanceState(outState);
     }
+
+    private ServiceConnection mConnection = new ServiceConnection() {
+
+        @Override
+        public void onServiceConnected(ComponentName className,
+                                       IBinder service) {
+
+            SpotifyPlayService.SpotifyPlayBinder binder = (SpotifyPlayService.SpotifyPlayBinder) service;
+            mSpotifyPlayService = binder.getService();
+            mSpotifyPlayService.setListOfTracks(mMusicItems);
+            mBound = true;
+
+            if(!mPlaying) {
+                mPlayButton.setImageResource(android.R.drawable.ic_media_pause);
+                mSpotifyPlayService.setTrack(mTrackPosition);
+                mSpotifyPlayService.playTrack();
+                mPlaying = true;
+            } else if(mTrackPosition != mSpotifyPlayService.getTrackPosition() && !mWasPaused) {
+                mTrackPosition = mSpotifyPlayService.getTrackPosition();
+                mTrackItem = (TrackItem) mMusicItems.get(mTrackPosition);
+                mPlayButton.setImageResource(android.R.drawable.ic_media_pause);
+                setViews(mTrackItem);
+            } else if(mWasPaused){
+                mPlaying = false;
+            } else if(!mSpotifyPlayService.playerIsPlaying()){
+                mPlayButton.setImageResource(android.R.drawable.ic_media_pause);
+                mSpotifyPlayService.setTrack(mTrackPosition);
+                mSpotifyPlayService.playTrack();
+                mPlaying = true;
+            }
+
+            animateSeekBar();
+
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName arg0) {
+            mBound = false;
+        }
+    };
 
 }

@@ -4,6 +4,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="com.almareng.appportfolio.SpotifyMainActivity">
 
+    <item android:id="@+id/action_now_playing"
+        android:title="Now Playing"
+        android:icon="@android:drawable/ic_media_play"
+        app:showAsAction="ifRoom"/>
+
     <item android:id="@+id/action_settings" android:title="@string/action_settings"
         android:orderInCategory="100" app:showAsAction="never" />
 </menu>

@@ -1,13 +1,20 @@
 package com.almareng.appportfolio;
 
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.almareng.appportfolio.Objects.MusicItem;
+import com.almareng.appportfolio.services.SpotifyPlayService;
 
 import java.util.ArrayList;
 
@@ -26,18 +33,36 @@ public class SpotifyMainActivity extends AppCompatActivity implements SpotifyMai
 
     public final static String TRACKS = "tracks";
 
+    public final static String NOW_PLAYING_TRACK_POSITION = "now_playing_track_position";
+
+    public final static String NOW_PLAYING_TRACK_ID = "now_playing_track_id";
+
+    public final static String NOW_PLAYING_ARTIST_NAME = "now_playing_artist_name";
+
+    public final static String NOW_PLAYING_PREFS = "now_playing_preferences";
+
+    public final static String NOW_PLAYING_STATUS = "now_playing_status";
+
     public final String TOP_TRACKS_FRAGMENT_TAG = "TTFT";
 
     public final static String PLAY_FRAGMENT_TAG = "PFT";
 
     private boolean mTwoPane;
 
+    private Toolbar mSpotifyToolbar;
+
+    private SpotifyPlayService mSpotifyPlayService;
+
+    private boolean mBound;
+
+    private Menu mMenu;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_spotify_main);
 
-        Toolbar mSpotifyToolbar = (Toolbar) findViewById(R.id.spotify_toolbar);
+        mSpotifyToolbar = (Toolbar) findViewById(R.id.spotify_toolbar);
 
         mSpotifyToolbar.setTitle(getString(R.string.spotify_streamer));
 
@@ -64,9 +89,45 @@ public class SpotifyMainActivity extends AppCompatActivity implements SpotifyMai
 
 
     @Override
+    protected void onStart() {
+        super.onStart();
+
+        Intent intent = new Intent(this, SpotifyPlayService.class);
+        getApplicationContext().bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+        startService(intent);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+        if(mBound){
+
+            getApplicationContext().unbindService(mConnection);
+            mBound = false;
+        }
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+
+        if(mBound){
+
+            if (mSpotifyPlayService.playerIsPlaying()) {
+                menu.findItem(R.id.action_now_playing).setVisible(true);
+            } else {
+                menu.findItem(R.id.action_now_playing).setVisible(false);
+            }
+
+        }
+        return super.onPrepareOptionsMenu(menu);
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_spotify_main, menu);
+        mMenu = menu;
         return true;
     }
 
@@ -79,6 +140,31 @@ public class SpotifyMainActivity extends AppCompatActivity implements SpotifyMai
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            return true;
+        } else if(id == R.id.action_now_playing){
+
+            if(mSpotifyPlayService.playerIsPlaying()){
+
+                ArrayList<MusicItem> tracks = mSpotifyPlayService.getTracks();
+
+                if(tracks != null) {
+
+                    SharedPreferences nowPlayingPrefs = getSharedPreferences(SpotifyMainActivity.NOW_PLAYING_PREFS, 0);
+
+                    Intent intent = new Intent(this, SpotifyPlayActivity.class);
+
+                    intent.putParcelableArrayListExtra(SpotifyMainActivity.TRACKS, tracks);
+                    int currentTrackPosition = mSpotifyPlayService.getTrackPosition();
+                    intent.putExtra(SpotifyMainActivity.TRACK_POSITION, currentTrackPosition);
+                    intent.putExtra(SpotifyMainActivity.ARTIST_NAME, nowPlayingPrefs.getString(SpotifyMainActivity.NOW_PLAYING_ARTIST_NAME, ""));
+                    intent.putExtra(SpotifyMainActivity.NOW_PLAYING_STATUS, true);
+
+                    startActivity(intent);
+
+                }
+            } else{
+                Toast.makeText(this, getString(R.string.nothing_playing), Toast.LENGTH_SHORT).show();
+            }
             return true;
         }
 
@@ -101,6 +187,8 @@ public class SpotifyMainActivity extends AppCompatActivity implements SpotifyMai
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.top_tracks_container, fragment, TOP_TRACKS_FRAGMENT_TAG)
                     .commit();
+
+            mSpotifyToolbar.setSubtitle(chosenArtist.getName());
 
         } else{
 
@@ -128,4 +216,31 @@ public class SpotifyMainActivity extends AppCompatActivity implements SpotifyMai
         spotifyPlayFragment.show(getSupportFragmentManager(), PLAY_FRAGMENT_TAG);
 
     }
+
+    private ServiceConnection mConnection = new ServiceConnection() {
+
+        @Override
+        public void onServiceConnected(ComponentName className,
+                                       IBinder service) {
+
+            SpotifyPlayService.SpotifyPlayBinder binder = (SpotifyPlayService.SpotifyPlayBinder) service;
+            mSpotifyPlayService = binder.getService();
+
+            if(mMenu != null) {
+                if (mSpotifyPlayService.playerIsPlaying()) {
+                    mMenu.findItem(R.id.action_now_playing).setVisible(true);
+                } else {
+                    mMenu.findItem(R.id.action_now_playing).setVisible(false);
+                }
+            }
+
+            mBound = true;
+
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName arg0) {
+            mBound = false;
+        }
+    };
 }

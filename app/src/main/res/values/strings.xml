@@ -22,13 +22,13 @@
     <string name="spotify_streamer">Spotify Streamer</string>
     <string name="search_hint">Artist Name</string>
     <string name="top_tracks">Top 10 Tracks</string>
+    <string name="nothing_playing">Nothing Playing</string>
 
     <!--/////////////////////////// SpotifyMainFragment //////////////////////////////////////-->
     <string name="must_insert_artirs_message">You must insert an artist name</string>
     <string name="no_artists_found">No artists found with this name</string>
     <string name="search">Search</string>
     <string name="title_activity_spotify_activity_top_tracks">SpotifyActivityTopTracks</string>
-
 
     <!--/////////////////////////// SpotifyPlayActivity //////////////////////////////////////-->
     <string name="title_activity_spotify_play">SpotifyPlayActivity</string>
