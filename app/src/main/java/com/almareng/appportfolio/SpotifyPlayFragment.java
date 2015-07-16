@@ -414,7 +414,7 @@ public class SpotifyPlayFragment extends DialogFragment implements View.OnClickL
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
 
-        inflater.inflate(R.menu.menu_spotify_play, menu);
+        inflater.inflate(R.menu.menu_spotify_share, menu);
 
         MenuItem menuItem = menu.findItem(R.id.action_share);
 

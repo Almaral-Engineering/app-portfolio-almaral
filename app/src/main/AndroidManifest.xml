@@ -40,8 +40,14 @@
                 android:value="com.almareng.appportfolio.SpotifyTopTracksActivity" />
         </activity>
 
-        <service android:name=".services.SpotifyPlayService"
-            android:exported="false"/>
+        <service
+            android:name=".services.SpotifyPlayService"
+            android:exported="false" />
+
+        <activity
+            android:name=".SpotifySettingsActivity"
+            android:label="@string/title_activity_spotify_settings" >
+        </activity>
     </application>
 
 </manifest>

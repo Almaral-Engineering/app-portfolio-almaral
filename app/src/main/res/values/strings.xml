@@ -41,4 +41,10 @@
     <string name="action_now_playing">Now Playing</string>
     <string name="action_share">Share</string>
 
+    <!--/////////////////////////// Spotify Preferences ///////////////////////////////////////-->
+    <string name="pref_country_key">spotify_country_key</string>
+    <string name="pref_country_label">Country code</string>
+    <string name="pref_country_default">US</string>
+    <string name="title_activity_spotify_settings">SpotifySettingsActivity</string>
+
 </resources>

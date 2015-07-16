@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <EditTextPreference
+        android:key="@string/pref_country_key"
+        android:title="@string/pref_country_label"
+        android:defaultValue="@string/pref_country_default"
+        android:textAllCaps="true"
+        android:textColor="@android:color/black"
+        android:textColorHint="@android:color/darker_gray"
+        android:textColorHighlight="@android:color/black"
+        android:capitalize="characters"
+        android:singleLine="true"/>
+
+</PreferenceScreen>

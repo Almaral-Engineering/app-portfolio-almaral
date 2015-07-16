@@ -140,6 +140,7 @@ public class SpotifyMainActivity extends AppCompatActivity implements SpotifyMai
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            startActivity(new Intent(this, SpotifySettingsActivity.class));
             return true;
         } else if(id == R.id.action_now_playing){
 

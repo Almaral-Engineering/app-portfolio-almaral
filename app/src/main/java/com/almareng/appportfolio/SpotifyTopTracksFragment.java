@@ -1,7 +1,9 @@
 package com.almareng.appportfolio;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -132,7 +134,9 @@ public class SpotifyTopTracksFragment extends Fragment {
     public void searchTopTracks(String artistId){
 
         Map<String, Object> map = new HashMap<>();
-        String country = "US";
+
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        String country = prefs.getString(getString(R.string.pref_country_key), getString(R.string.pref_country_default));
         map.put("country", country);
 
         mSpotify.getArtistTopTrack(artistId, map, new Callback<Tracks>() {
