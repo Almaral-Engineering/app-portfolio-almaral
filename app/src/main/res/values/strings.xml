@@ -36,15 +36,23 @@
     <string name="zero_time">0:00</string>
     <string name="final_time">0:30</string>
     <string name="IO_exception_media_stream">url invalid or empty</string>
+    <string name="action_play">Play</string>
+    <string name="action_previous">Previous</string>
+    <string name="action_next">Next</string>
 
     <!--/////////////////////////// Spotify Menu Options //////////////////////////////////////-->
     <string name="action_now_playing">Now Playing</string>
     <string name="action_share">Share</string>
 
     <!--/////////////////////////// Spotify Preferences ///////////////////////////////////////-->
-    <string name="pref_country_key">spotify_country_key</string>
-    <string name="pref_country_label">Country code</string>
-    <string name="pref_country_default">US</string>
-    <string name="title_activity_spotify_settings">SpotifySettingsActivity</string>
+    <string name="pref_country_key" translatable = "false">spotify_country_key</string>
+    <string name="pref_country_label" translatable = "false">Country code</string>
+    <string name="pref_country_default" translatable = "false">US</string>
+    <string name="pref_enable_notifications_key" translatable = "false">notifications</string>
+    <string name="pref_enable_notifications_label" translatable = "false">Show Notifications</string>
+    <string name="pref_enable_notifications_false" translatable = "false">Not Enabled</string>
+    <string name="pref_enable_notifications_true" translatable = "false">Enabled</string>
+    <string name="pref_enable_notifications_default" translatable = "false">true</string>
+    <string name="title_activity_spotify_settings">Settings</string>
 
 </resources>

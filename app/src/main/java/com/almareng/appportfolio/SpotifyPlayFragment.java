@@ -58,7 +58,6 @@ public class SpotifyPlayFragment extends DialogFragment implements View.OnClickL
     private ArrayList<MusicItem> mMusicItems;
     private int mTrackPosition;
     private TrackItem mTrackItem;
-    private String mArtistName;
 
     private int mPlayerCurrentPosition = 0;
 
@@ -80,7 +79,6 @@ public class SpotifyPlayFragment extends DialogFragment implements View.OnClickL
         mPlaying = getArguments().getBoolean(SpotifyMainActivity.NOW_PLAYING_STATUS);
 
         mMusicItems = getArguments().getParcelableArrayList(SpotifyMainActivity.TRACKS);
-        mArtistName = getArguments().getString(SpotifyMainActivity.ARTIST_NAME);
 
     }
 
@@ -115,10 +113,10 @@ public class SpotifyPlayFragment extends DialogFragment implements View.OnClickL
 
                 mPlayerCurrentPosition = progress * 1000;
 
-                if((mPlayerCurrentPosition/1000) < 10)
-                    mTrackProgress.setText("0:0" + mPlayerCurrentPosition/1000);
+                if ((mPlayerCurrentPosition / 1000) < 10)
+                    mTrackProgress.setText("0:0" + mPlayerCurrentPosition / 1000);
                 else
-                    mTrackProgress.setText("0:" + mPlayerCurrentPosition/1000);
+                    mTrackProgress.setText("0:" + mPlayerCurrentPosition / 1000);
             }
 
             @Override
@@ -132,7 +130,7 @@ public class SpotifyPlayFragment extends DialogFragment implements View.OnClickL
 
                 mPlayerCurrentPosition = progress * 1000;
 
-                if(mSpotifyPlayService.playerIsPlaying()) {
+                if (mSpotifyPlayService.playerIsPlaying()) {
                     mSpotifyPlayService.seekTo(mPlayerCurrentPosition);
 
                     if ((mPlayerCurrentPosition / 1000) < 10)
@@ -140,7 +138,7 @@ public class SpotifyPlayFragment extends DialogFragment implements View.OnClickL
                     else
                         mTrackProgress.setText("0:" + mPlayerCurrentPosition / 1000);
 
-                } else{
+                } else {
 
                     mPlayBar.setProgress(0);
                     Toast.makeText(getActivity(), "Wait fot the song to start", Toast.LENGTH_SHORT).show();
@@ -183,11 +181,7 @@ public class SpotifyPlayFragment extends DialogFragment implements View.OnClickL
 
         if (mTrackItem != null) {
 
-            if(mArtistName == null) {
-                mArtistName = getArguments().getString(SpotifyMainActivity.ARTIST_NAME);
-            }
-
-            mArtistTxt.setText(mArtistName);
+            mArtistTxt.setText(mTrackItem.getArtistName());
 
             mTrackTxt.setText(mTrackItem.getName());
             mAlbumTxt.setText(mTrackItem.getAlbumName());
@@ -199,7 +193,7 @@ public class SpotifyPlayFragment extends DialogFragment implements View.OnClickL
 
             SharedPreferences.Editor editor = playingNowPref.edit();
 
-            editor.putString(SpotifyMainActivity.NOW_PLAYING_ARTIST_NAME, mArtistName);
+            editor.putString(SpotifyMainActivity.NOW_PLAYING_ARTIST_NAME, mTrackItem.getArtistName());
             editor.putInt(SpotifyMainActivity.NOW_PLAYING_TRACK_POSITION, mTrackPosition);
             editor.putString(SpotifyMainActivity.NOW_PLAYING_TRACK_ID, trackItem.getId());
             editor.apply();
@@ -289,6 +283,7 @@ public class SpotifyPlayFragment extends DialogFragment implements View.OnClickL
         super.onStart();
 
         Intent intent = new Intent(getActivity(), SpotifyPlayService.class);
+        intent.setAction(SpotifyPlayService.ACTION_PLAY );
         getActivity().getApplicationContext().bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
         getActivity().startService(intent);
 
@@ -300,6 +295,10 @@ public class SpotifyPlayFragment extends DialogFragment implements View.OnClickL
 
         if(mHandler != null) {
             mHandler.removeCallbacks(mRunnable);
+        }
+
+        if(!mSpotifyPlayService.playerIsPlaying()){
+            mSpotifyPlayService.dispatchNotification();
         }
 
         if(mBound){
@@ -432,7 +431,7 @@ public class SpotifyPlayFragment extends DialogFragment implements View.OnClickL
         Intent shareIntent = new Intent(Intent.ACTION_SEND);
         shareIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
         shareIntent.setType("text/plain");
-        shareIntent.putExtra(Intent.EXTRA_TEXT, String.format(getString(R.string.spotify_share_string),mTrackItem.getName(),mArtistName,mTrackItem.getPreviewUrl()));
+        shareIntent.putExtra(Intent.EXTRA_TEXT, String.format(getString(R.string.spotify_share_string),mTrackItem.getName(), mTrackItem.getArtistName(), mTrackItem.getPreviewUrl()));
 
         return shareIntent;
 

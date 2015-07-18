@@ -4,6 +4,12 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="com.almareng.appportfolio.SpotifyMainActivity">
 
+    <item android:id="@+id/action_share"
+        android:title="@string/action_share"
+        app:showAsAction="ifRoom"
+        android:visible="false"
+        app:actionProviderClass="android.support.v7.widget.ShareActionProvider"/>
+
     <item android:id="@+id/action_now_playing"
         android:title="@string/action_now_playing"
         android:icon="@android:drawable/ic_media_play"

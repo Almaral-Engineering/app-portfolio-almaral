@@ -7,13 +7,16 @@ import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.ShareActionProvider;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
 import com.almareng.appportfolio.Objects.MusicItem;
+import com.almareng.appportfolio.Objects.TrackItem;
 import com.almareng.appportfolio.services.SpotifyPlayService;
 
 import java.util.ArrayList;
@@ -56,6 +59,10 @@ public class SpotifyMainActivity extends AppCompatActivity implements SpotifyMai
     private boolean mBound;
 
     private Menu mMenu;
+
+    private boolean mPlayingStatus;
+
+    private ShareActionProvider mShareActionProvider;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -118,6 +125,28 @@ public class SpotifyMainActivity extends AppCompatActivity implements SpotifyMai
             } else {
                 menu.findItem(R.id.action_now_playing).setVisible(false);
             }
+
+            if (getResources().getBoolean(R.bool.large_layout) && mSpotifyPlayService.playerIsPlaying()) {
+
+                MenuItem menuItem = menu.findItem(R.id.action_share);
+
+                menuItem.setVisible(true);
+
+                mShareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(menuItem);
+
+                TrackItem trackItem = mSpotifyPlayService.getCurrentTrack();
+
+                if(trackItem != null) {
+
+                    Intent shareIntent = new Intent(Intent.ACTION_SEND);
+                    shareIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
+                    shareIntent.setType("text/plain");
+                    shareIntent.putExtra(Intent.EXTRA_TEXT, String.format(getString(R.string.spotify_share_string), trackItem.getName(), trackItem.getArtistName(), trackItem.getPreviewUrl()));
+
+                    mShareActionProvider.setShareIntent(shareIntent);
+                }
+
+            }
         }
         return super.onPrepareOptionsMenu(menu);
 
@@ -128,6 +157,7 @@ public class SpotifyMainActivity extends AppCompatActivity implements SpotifyMai
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_spotify_main, menu);
         mMenu = menu;
+
         return true;
     }
 
@@ -150,22 +180,30 @@ public class SpotifyMainActivity extends AppCompatActivity implements SpotifyMai
 
                 if(tracks != null) {
 
-                    SharedPreferences nowPlayingPrefs = getSharedPreferences(SpotifyMainActivity.NOW_PLAYING_PREFS, 0);
+                    if (mTwoPane) {
 
-                    Intent intent = new Intent(this, SpotifyPlayActivity.class);
+                        showPlayFragment(tracks, mSpotifyPlayService.getTrackPosition());
 
-                    intent.putParcelableArrayListExtra(SpotifyMainActivity.TRACKS, tracks);
-                    int currentTrackPosition = mSpotifyPlayService.getTrackPosition();
-                    intent.putExtra(SpotifyMainActivity.TRACK_POSITION, currentTrackPosition);
-                    intent.putExtra(SpotifyMainActivity.ARTIST_NAME, nowPlayingPrefs.getString(SpotifyMainActivity.NOW_PLAYING_ARTIST_NAME, ""));
-                    intent.putExtra(SpotifyMainActivity.NOW_PLAYING_STATUS, true);
+                    } else {
 
-                    startActivity(intent);
+                        SharedPreferences nowPlayingPrefs = getSharedPreferences(SpotifyMainActivity.NOW_PLAYING_PREFS, 0);
+
+                        Intent intent = new Intent(this, SpotifyPlayActivity.class);
+
+                        intent.putParcelableArrayListExtra(SpotifyMainActivity.TRACKS, tracks);
+                        int currentTrackPosition = mSpotifyPlayService.getTrackPosition();
+                        intent.putExtra(SpotifyMainActivity.TRACK_POSITION, currentTrackPosition);
+                        intent.putExtra(SpotifyMainActivity.ARTIST_NAME, nowPlayingPrefs.getString(SpotifyMainActivity.NOW_PLAYING_ARTIST_NAME, ""));
+                        intent.putExtra(SpotifyMainActivity.NOW_PLAYING_STATUS, true);
+
+                        startActivity(intent);
+                    }
 
                 }
             } else{
                 Toast.makeText(this, getString(R.string.nothing_playing), Toast.LENGTH_SHORT).show();
             }
+
             return true;
         }
 
@@ -204,18 +242,37 @@ public class SpotifyMainActivity extends AppCompatActivity implements SpotifyMai
     }
 
     @Override
-    public void showPlayFragment(ArrayList<MusicItem> musicItems, int position, String artistName) {
+    public void showPlayFragment(ArrayList<MusicItem> musicItems, int position) {
 
         SpotifyPlayFragment spotifyPlayFragment = new SpotifyPlayFragment();
+
+        TrackItem trackItem = (TrackItem) musicItems.get(position);
+
+        String artistName = trackItem.getArtistName();
 
         Bundle bundle = new Bundle();
         bundle.putParcelableArrayList(SpotifyMainActivity.TRACKS, musicItems);
         bundle.putString(SpotifyMainActivity.ARTIST_NAME, artistName);
         bundle.putInt(SpotifyMainActivity.TRACK_POSITION, position);
+
+        if(trackItem.getId().equals(mSpotifyPlayService.getTrackId())){
+            bundle.putBoolean(SpotifyMainActivity.NOW_PLAYING_STATUS, true);
+        }
+        else{
+            bundle.putBoolean(SpotifyMainActivity.NOW_PLAYING_STATUS, false);
+        }
         spotifyPlayFragment.setArguments(bundle);
 
         spotifyPlayFragment.show(getSupportFragmentManager(), PLAY_FRAGMENT_TAG);
 
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if(!mSpotifyPlayService.playerIsPlaying()){
+            mSpotifyPlayService.dispatchNotification();
+        }
     }
 
     private ServiceConnection mConnection = new ServiceConnection() {
@@ -236,6 +293,16 @@ public class SpotifyMainActivity extends AppCompatActivity implements SpotifyMai
             }
 
             mBound = true;
+
+            Bundle extras = getIntent().getExtras();
+
+            if(extras != null){
+                ArrayList<MusicItem> musicItems = extras.getParcelableArrayList(SpotifyMainActivity.TRACKS);
+                mPlayingStatus = extras.getBoolean(SpotifyMainActivity.NOW_PLAYING_STATUS);
+                int position = extras.getInt(SpotifyMainActivity.TRACK_POSITION);
+
+                showPlayFragment(musicItems, position);
+            }
 
         }
 

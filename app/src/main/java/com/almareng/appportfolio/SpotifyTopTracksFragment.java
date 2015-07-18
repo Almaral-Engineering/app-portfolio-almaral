@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.ShareActionProvider;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,6 +16,7 @@ import android.widget.ListView;
 import com.almareng.appportfolio.Objects.MusicItem;
 import com.almareng.appportfolio.Objects.TrackItem;
 import com.almareng.appportfolio.adapters.MusicAdapter;
+import com.almareng.appportfolio.services.SpotifyPlayService;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -46,9 +48,14 @@ public class SpotifyTopTracksFragment extends Fragment {
 
     private MusicAdapter mMusicAdapter;
 
+    private ShareActionProvider mShareActionProvider;
+
     private ArrayList<MusicItem> mMusicItems = new ArrayList<>();
 
-    public SpotifyTopTracksFragment() {
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
     }
 
     @Override
@@ -95,7 +102,7 @@ public class SpotifyTopTracksFragment extends Fragment {
 
                 if(mTwoPane) {
 
-                    ((SpotifyTopTracksCallback) getActivity()).showPlayFragment(mMusicItems, position, mArtistName);
+                    ((SpotifyTopTracksCallback) getActivity()).showPlayFragment(mMusicItems, position);
 
                 } else {
 
@@ -104,10 +111,9 @@ public class SpotifyTopTracksFragment extends Fragment {
                     intent.putParcelableArrayListExtra(SpotifyMainActivity.TRACKS, mMusicItems);
 
                     intent.putExtra(SpotifyMainActivity.TRACK_POSITION, position);
-
-                    intent.putExtra(SpotifyMainActivity.ARTIST_NAME, mArtistName);
-
                     TrackItem trackItem = (TrackItem) mMusicItems.get(position);
+
+                    intent.setAction( SpotifyPlayService.ACTION_PLAY );
 
                     if(trackItem.getId().equals(((SpotifyTopTracksActivity)getActivity()).getCurrentTrackId())){
                         intent.putExtra(SpotifyMainActivity.NOW_PLAYING_STATUS, true);
@@ -127,7 +133,7 @@ public class SpotifyTopTracksFragment extends Fragment {
 
     public interface SpotifyTopTracksCallback{
 
-        void showPlayFragment(ArrayList<MusicItem> musicItems, int position, String artistName);
+        void showPlayFragment(ArrayList<MusicItem> musicItems, int position);
 
     }
 
@@ -151,15 +157,15 @@ public class SpotifyTopTracksFragment extends Fragment {
 
                         if (track.album.images.size() > 1) {
 
-                            mMusicItems.add(new TrackItem(track.id, track.name, track.duration_ms, track.album.images.get(0).url, track.album.images.get(1).url, track.album.name, track.preview_url));
+                            mMusicItems.add(new TrackItem(track.id, track.name, track.duration_ms, track.album.images.get(0).url, track.album.images.get(1).url, track.album.name, track.preview_url, mArtistName));
 
                         } else if (track.album.images.size() > 0) {
 
-                            mMusicItems.add(new TrackItem(track.id, track.name, track.duration_ms,track.album.images.get(0).url, track.album.images.get(0).url, track.album.name, track.preview_url));
+                            mMusicItems.add(new TrackItem(track.id, track.name, track.duration_ms,track.album.images.get(0).url, track.album.images.get(0).url, track.album.name, track.preview_url, mArtistName));
 
                         } else {
 
-                            mMusicItems.add(new TrackItem(track.id, track.name, track.duration_ms, null, null, track.album.name, track.preview_url));
+                            mMusicItems.add(new TrackItem(track.id, track.name, track.duration_ms, null, null, track.album.name, track.preview_url, mArtistName));
 
                         }
 
@@ -192,4 +198,5 @@ public class SpotifyTopTracksFragment extends Fragment {
         super.onSaveInstanceState(outState);
 
     }
+
 }

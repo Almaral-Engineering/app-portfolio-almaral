@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.ShareActionProvider;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -15,10 +14,6 @@ import com.almareng.appportfolio.Objects.MusicItem;
 import java.util.ArrayList;
 
 public class SpotifyPlayActivity extends AppCompatActivity{
-
-    public final static String SONG_PREF = "song_preferences";
-
-    private ShareActionProvider mShareActionProvider;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,8 +37,6 @@ public class SpotifyPlayActivity extends AppCompatActivity{
 
         Bundle extras = getIntent().getExtras();
 
-        String artistName = extras.getString(SpotifyMainActivity.ARTIST_NAME);
-
         ArrayList<MusicItem> musicItems = extras.getParcelableArrayList(SpotifyMainActivity.TRACKS);
 
         if(musicItems != null) {
@@ -53,7 +46,6 @@ public class SpotifyPlayActivity extends AppCompatActivity{
 
                 Bundle bundle = new Bundle();
                 bundle.putParcelableArrayList(SpotifyMainActivity.TRACKS, musicItems);
-                bundle.putString(SpotifyMainActivity.ARTIST_NAME, artistName);
                 bundle.putBoolean(SpotifyMainActivity.NOW_PLAYING_STATUS, extras.getBoolean(SpotifyMainActivity.NOW_PLAYING_STATUS));
                 bundle.putInt(SpotifyMainActivity.TRACK_POSITION, extras.getInt(SpotifyMainActivity.TRACK_POSITION));
                 playFragment.setArguments(bundle);

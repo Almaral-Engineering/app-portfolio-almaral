@@ -20,6 +20,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         setSupportActionBar(mainToolbar);
 
+        getSupportActionBar();
+
         Button spotifyBtn = (Button) findViewById(R.id.spotify_btn);
 
         spotifyBtn.setOnClickListener(this);

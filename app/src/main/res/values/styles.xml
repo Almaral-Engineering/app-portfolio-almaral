@@ -8,7 +8,7 @@
 
         <item name="colorAccent">@android:color/holo_red_dark</item>
 
-        <item name="android:textColorPrimary">@android:color/white</item>
+        <item name="android:textColorPrimary">@android:color/black</item>
 
     </style>
 
@@ -18,6 +18,13 @@
         <item name="colorPrimaryDark">@color/amber_900</item>
         <item name="colorAccent">@android:color/holo_red_dark</item>
 
+    </style>
+
+    <style name="MainActivityButtonStyle" parent="Base.Widget.AppCompat.Button">
+
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:background">@drawable/button_background_one</item>
+        <item name="android:layout_marginTop">20dp</item>
     </style>
 
 </resources>

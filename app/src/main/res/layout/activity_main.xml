@@ -9,7 +9,8 @@
         android:layout_height="wrap_content"
         android:layout_width="match_parent"
         android:minHeight="?attr/actionBarSize"
-        android:background="?attr/colorPrimary" />
+        android:background="?attr/colorPrimary"
+        android:theme="@style/DarkTheme"/>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -33,6 +34,7 @@
             android:layout_height="wrap_content"
             android:text="@string/spotify_streamer_app"
             android:background="@drawable/button_background_one"
+            android:textColor="@android:color/white"
             android:layout_marginTop="20dp"/>
 
         <Button
@@ -42,6 +44,7 @@
             android:text="@string/scores_app"
             android:background="@drawable/button_background_one"
             android:layout_marginTop="20dp"
+            android:textColor="@android:color/white"
             android:onClick="displayToast"/>
 
         <Button
@@ -49,8 +52,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/library_app"
-            android:background="@drawable/button_background_one"
-            android:layout_marginTop="20dp"
+            style="@style/MainActivityButtonStyle"
             android:onClick="displayToast"/>
 
         <Button
@@ -58,8 +60,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/build_it_bigger_app"
-            android:background="@drawable/button_background_one"
-            android:layout_marginTop="20dp"
+            style="@style/MainActivityButtonStyle"
             android:onClick="displayToast"/>
 
         <Button
@@ -67,8 +68,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/xyz_reader_app"
-            android:background="@drawable/button_background_one"
-            android:layout_marginTop="20dp"
+            style="@style/MainActivityButtonStyle"
             android:onClick="displayToast"/>
 
         <Button
@@ -76,8 +76,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/capstone_my_own_app"
+            style="@style/MainActivityButtonStyle"
             android:background="@drawable/button_background_two"
-            android:layout_marginTop="20dp"
             android:onClick="displayToast"/>
 
     </LinearLayout>
